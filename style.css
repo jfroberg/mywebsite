@@ -1,0 +1,33 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #00274C; /* Michigan Blue */
+    color: #FFCB05; /* Michigan Maize */
+    text-align: center;
+    padding: 50px;
+}
+
+h1 {
+    color: #FFCB05; /* Michigan Maize */
+}
+
+p {
+    color: #FFFFFF; /* White for contrast */
+}
+#search {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+#itemList {
+    list-style-type: none;
+    padding: 0;
+}
+
+#itemList li {
+    padding: 8px;
+    margin-bottom: 5px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+}
