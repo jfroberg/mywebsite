@@ -3,10 +3,27 @@ body, html {
     padding: 0;
     overflow: hidden;
     height: 100%;
+    background: linear-gradient(135deg, #3a7bd5, #00d2ff); /* Cool blue gradient */
+}
+
+.circle-container {
+    width: 60vw;
+    height: 60vw;
+    max-width: 450px;
+    max-height: 450px;
+    border-radius: 50%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.1); /* Slightly transparent white background */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    margin: auto;
+    border: 2px solid rgba(255, 255, 255, 0.3); /* Add a border */
 }
 
 canvas {
+    width: 100%;
+    height: 100%;
     display: block;
-    width: 100vw;
-    height: 100vh;
 }

@@ -1,24 +1,52 @@
 const canvas = document.getElementById('particleCanvas');
 const ctx = canvas.getContext('2d');
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+function resizeCanvas() {
+    const container = document.querySelector('.circle-container');
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
+}
+
+resizeCanvas();
 
 const particlesArray = [];
-const numberOfParticles = 100;
+const numberOfParticles = 1000;
+let currentParticleCount = 0; // Track the number of particles currently spawned
+const spawnInterval = 10; // Time in milliseconds between spawning particles
+
 const mouse = {
     x: null,
     y: null,
     radius: 150 // Interaction radius
 };
 
-// Update mouse position
+let attractionActive = false; // Start with attraction off
+
 canvas.addEventListener('mousemove', function(event) {
-    mouse.x = event.x;
-    mouse.y = event.y;
+    if (attractionActive) {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = event.clientX - rect.left;
+        mouse.y = event.clientY - rect.top;
+    }
 });
 
-// Particle class
+// Toggle attraction on click
+canvas.addEventListener('click', function() {
+    attractionActive = !attractionActive;
+    if (!attractionActive) {
+        mouse.x = null;
+        mouse.y = null;
+    }
+});
+
+const attractionSlider = document.getElementById('attractionSlider');
+attractionSlider.addEventListener('input', function() {
+    const attractionForce = parseFloat(this.value);
+    particlesArray.forEach(particle => {
+        particle.attractionForce = attractionForce;
+    });
+});
+
 class Particle {
     constructor(x, y, size, color, weight) {
         this.x = x;
@@ -26,9 +54,14 @@ class Particle {
         this.size = size;
         this.color = color;
         this.weight = weight;
-        this.directionX = (Math.random() * 0.4) - 0.2;
-        this.velocity = { x: 0, y: 0 }; // Velocity vector
-        this.friction = 0.98; // Friction coefficient
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 2;
+        this.velocity = {
+            x: Math.cos(angle) * speed,
+            y: Math.sin(angle) * speed
+        };
+        this.friction = 0.995;
+        this.attractionForce = 0.2;
     }
 
     draw() {
@@ -40,58 +73,69 @@ class Particle {
     }
 
     update() {
-        // Mouse interaction with gravitational effect
-        let dx = mouse.x - this.x;
-        let dy = mouse.y - this.y;
-        let distance = Math.sqrt(dx * dx + dy * dy);
-
-        if (distance < mouse.radius) {
-            let forceDirectionX = dx / distance;
-            let forceDirectionY = dy / distance;
-            let maxDistance = mouse.radius;
-            let force = (maxDistance - distance) / maxDistance; // Force decreases with distance
-            let directionX = forceDirectionX * force * this.weight;
-            let directionY = forceDirectionY * force * this.weight;
-
-            this.velocity.x += directionX;
-            this.velocity.y += directionY;
+        if (attractionActive && mouse.x !== null && mouse.y !== null) {
+            let dx = mouse.x - this.x;
+            let dy = mouse.y - this.y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < mouse.radius) {
+                let forceDirectionX = dx / distance;
+                let forceDirectionY = dy / distance;
+                let maxDistance = mouse.radius;
+                let force = (maxDistance - distance) / maxDistance * this.attractionForce;
+                let directionX = forceDirectionX * force * this.weight;
+                let directionY = forceDirectionY * force * this.weight;
+                this.velocity.x += directionX;
+                this.velocity.y += directionY;
+            }
         }
 
-        // Apply friction
         this.velocity.x *= this.friction;
         this.velocity.y *= this.friction;
-
-        // Update position
         this.x += this.velocity.x;
-        this.y += this.velocity.y + this.weight;
+        this.y += this.velocity.y;
 
-        // Reset position if out of bounds
-        if (this.y > canvas.height) {
-            this.y = 0 - this.size;
-            this.x = Math.random() * canvas.width;
-            this.velocity.y = 0;
-        }
-
-        if (this.x > canvas.width || this.x < 0) {
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const radius = canvas.width / 2;
+        let distFromCenter = Math.sqrt((this.x - centerX) ** 2 + (this.y - centerY) ** 2);
+        if (distFromCenter + this.size > radius) {
+            let angle = Math.atan2(this.y - centerY, this.x - centerX);
+            this.x = centerX + (radius - this.size) * Math.cos(angle);
+            this.y = centerY + (radius - this.size) * Math.sin(angle);
             this.velocity.x = -this.velocity.x;
+            this.velocity.y = -this.velocity.y;
         }
     }
 }
 
-// Initialize particles
-function init() {
-    particlesArray.length = 0;
-    for (let i = 0; i < numberOfParticles; i++) {
+function spawnParticle() {
+    if (currentParticleCount < numberOfParticles) {
         const size = Math.random() * 5 + 1;
-        const x = Math.random() * canvas.width;
-        const y = Math.random() * canvas.height;
-        const color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const x = centerX + (Math.random() - 0.5) * 50;
+        const y = centerY + (Math.random() - 0.5) * 50;
+
+        // Use cool blue and white colors
+        const colors = [
+            'rgba(173, 216, 230, 0.8)', // Light blue
+            'rgba(135, 206, 250, 0.8)', // Sky blue
+            'rgba(255, 255, 255, 0.8)', // White
+            'rgba(70, 130, 180, 0.8)', // Steel blue
+        ];
+        const color = colors[Math.floor(Math.random() * colors.length)];
         const weight = Math.random() * 2 + 1;
         particlesArray.push(new Particle(x, y, size, color, weight));
+        currentParticleCount++;
     }
 }
 
-// Animate particles
+function init() {
+    particlesArray.length = 0;
+    currentParticleCount = 0;
+    setInterval(spawnParticle, spawnInterval);
+}
+
 function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     particlesArray.forEach(particle => {
@@ -104,9 +148,7 @@ function animate() {
 init();
 animate();
 
-// Handle window resize
 window.addEventListener('resize', function() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    resizeCanvas();
     init();
 });

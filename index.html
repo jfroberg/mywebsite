@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Particle System</title>
     <link rel="stylesheet" href="style.css">
+    <title>Particle Animation</title>
+    <input type="range" id="attractionSlider" min="0" max="1" step="0.01" value="0.2">
 </head>
 <body>
-    <canvas id="particleCanvas"></canvas>
+    <div class="circle-container">
+        <canvas id="particleCanvas"></canvas>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
