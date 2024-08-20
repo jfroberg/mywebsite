@@ -1,18 +1,24 @@
 let cols, rows;
 let scale = 20;
 let fluid;
+let colorful = false;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   cols = floor(width / scale);
   rows = floor(height / scale);
   fluid = new Fluid(cols, rows, scale);
+  
+  // Add event listener for color toggle
+  document.getElementById('toggleColors').addEventListener('click', () => {
+    colorful = !colorful;
+  });
 }
 
 function draw() {
   background(0);
   fluid.update();
-  fluid.display();
+  fluid.display(colorful);
 }
 
 function mouseDragged() {
@@ -55,12 +61,16 @@ class Fluid {
     }
   }
 
-  display() {
+  display(colorful) {
     for (let y = 0; y < this.rows; y++) {
       for (let x = 0; x < this.cols; x++) {
         let index = x + y * this.cols;
         let d = this.density[index];
-        fill(d);
+        if (colorful) {
+          fill(d, 100, 255 - d);
+        } else {
+          fill(d);
+        }
         noStroke();
         rect(x * this.scale, y * this.scale, this.scale, this.scale);
       }
