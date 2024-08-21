@@ -7,6 +7,11 @@ function resizeCanvas() {
     canvas.height = container.clientHeight;
 }
 
+window.addEventListener('resize', function() {
+    resizeCanvas();
+    init(); // Reinitialize particles with the new size
+});
+
 resizeCanvas();
 
 const particlesArray = [];
