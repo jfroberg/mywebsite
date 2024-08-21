@@ -1,6 +1,14 @@
 const canvas = document.getElementById('particleCanvas');
 const ctx = canvas.getContext('2d');
 
+const particlesArray = [];
+const numberOfParticles = 1800;
+let currentParticleCount = 0;
+const spawnInterval = 0;
+const mouse = { x: null, y: null, radius: 150 };
+let attractionActive = false;
+let repulsionMode = false;
+
 function resizeCanvas() {
     const container = document.querySelector('.circle-container');
     canvas.width = container.clientWidth;
@@ -13,14 +21,6 @@ window.addEventListener('resize', function() {
 });
 
 resizeCanvas();
-
-const particlesArray = [];
-const numberOfParticles = 1800;
-let currentParticleCount = 0;
-const spawnInterval = 0;
-const mouse = { x: null, y: null, radius: 150 };
-let attractionActive = false;
-let repulsionMode = false;
 
 canvas.addEventListener('mousemove', function(event) {
     if (attractionActive) {
@@ -78,13 +78,23 @@ const palettes = {
         background: 'linear-gradient(135deg, #2c003e, #3a000d)',
         button: '#8b0000',
         buttonHover: '#a52a2a'
+    },
+    pastelPink: {
+        particles: ['rgba(255, 182, 193, 0.8)', 'rgba(255, 192, 203, 0.8)', 'rgba(255, 228, 225, 0.8)', 'rgba(225, 220, 245, 0.8)'],
+        background: 'linear-gradient(135deg, #fff0f5, #ffe4e1)',
+        button: '#ffc0cb',
+        buttonHover: '#ffb6c1'
+    },
+    cherryBlossom: {
+        particles: ['rgba(85, 133, 59, 0.8)', 'rgba(255, 192, 203, 0.8)', 'rgba(255, 182, 193, 0.8)', 'rgba(255, 105, 180, 0.8)'],
+        background: 'linear-gradient(135deg, #ffe4e1, #ffebcd)',
+        button: '#ff69b4',
+        buttonHover: '#ff1493'
     }
 };
 
-// Set the initial palette to Crimson Twilight
 let currentPalette = palettes.coolBlue;
 
-// Ensure your palette selector can choose these new palettes
 document.getElementById('paletteSelector').addEventListener('change', function(event) {
     currentPalette = palettes[event.target.value];
     document.body.style.background = currentPalette.background;
@@ -97,8 +107,6 @@ document.getElementById('paletteSelector').addEventListener('change', function(e
     });
     init(); // Reinitialize particles with the new palette
 });
-
-
 
 class Particle {
     constructor(x, y, size, color, weight) {
@@ -146,7 +154,6 @@ class Particle {
                 }
             }
         }
-
         this.applyRepulsion();
         this.velocity.x *= this.friction;
         this.velocity.y *= this.friction;
@@ -216,8 +223,3 @@ function animate() {
 
 init();
 animate();
-
-window.addEventListener('resize', function() {
-    resizeCanvas();
-    init();
-});
