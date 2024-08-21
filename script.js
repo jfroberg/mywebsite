@@ -1,8 +1,7 @@
 const canvas = document.getElementById('particleCanvas');
 const ctx = canvas.getContext('2d');
-
 const particlesArray = [];
-const numberOfParticles = 1800;
+const numberOfParticles = 2000;
 let currentParticleCount = 0;
 const spawnInterval = 0;
 const mouse = { x: null, y: null, radius: 150 };
@@ -13,13 +12,10 @@ function resizeCanvas() {
     const container = document.querySelector('.circle-container');
     canvas.width = container.clientWidth;
     canvas.height = container.clientHeight;
+    init(); // Reinitialize particles with the new size
 }
 
-window.addEventListener('resize', function() {
-    resizeCanvas();
-    init(); // Reinitialize particles with the new size
-});
-
+window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
 canvas.addEventListener('mousemove', function(event) {
@@ -90,8 +86,45 @@ const palettes = {
         background: 'linear-gradient(135deg, #ffe4e1, #ffebcd)',
         button: '#ff69b4',
         buttonHover: '#ff1493'
+    },
+    highContrast: {
+        particles: ['rgba(0, 0, 0, 0.8)', 'rgba(255, 255, 255, 0.8)', 'rgba(255, 0, 0, 0.8)', 'rgba(0, 255, 0, 0.8)'],
+        background: 'linear-gradient(135deg, #f0f0f0, #ffffff)',
+        button: '#0f0f0f0',
+        buttonHover: '#ffffff'
+    },
+    matrix: {
+        particles: ['rgba(0, 255, 0, 0.8)', 'rgba(0, 128, 0, 0.8)', 'rgba(0, 100, 0, 0.8)', 'rgba(0, 255, 127, 0.8)'],
+        background: 'linear-gradient(135deg, #001100, #003300)',
+        button: '#00ff00',
+        buttonHover: '#009900'
+    },
+    candyPop: {
+        particles: ['rgba(255, 105, 180, 0.8)', 'rgba(255, 20, 147, 0.8)', 'rgba(255, 182, 193, 0.8)', 'rgba(255, 160, 122, 0.8)'],
+        background: 'linear-gradient(135deg, #ffb6c1, #ff69b4)',
+        button: '#ff1493',
+        buttonHover: '#ff69b4'
+    },
+    evaUnit01: {
+        particles: ['rgba(118, 88, 152, 0.8)', 'rgba(139, 212, 80, 0.8)', 'rgba(162, 178, 223, 0.8)', 'rgba(230, 119, 11, 0.8)'],
+        background: 'linear-gradient(135deg, #3d2c47, #4a5e35)', // Darker and more muted
+        button: '#fff',
+        buttonHover: '#f0f0f0'
+    },
+    evaUnit00: {
+        particles: ['rgba(70, 96, 158, 0.8)', 'rgba(243, 243, 245, 0.8)', 'rgba(142, 68, 60, 0.8)', 'rgba(212, 49, 38, 0.8)'],
+        background: 'linear-gradient(135deg, #2c3e50, #4f4f4f)', // Darker and more muted
+        button: '#fff',
+        buttonHover: '#f0f0f0'
+    },
+    evaUnit02: {
+        particles: ['rgba(255, 58, 33, 0.8)', 'rgba(247, 138, 24, 0.8)', 'rgba(128, 30, 130, 0.8)', 'rgba(9, 150, 134, 0.8)'],
+        background: 'linear-gradient(135deg, #4a1c1c, #5b3b1e)', // Darker and more muted
+        button: '#fff',
+        buttonHover: '#f0f0f0'
     }
 };
+
 
 let currentPalette = palettes.coolBlue;
 
@@ -194,7 +227,7 @@ class Particle {
 
 function spawnParticle() {
     if (currentParticleCount < numberOfParticles) {
-        const size = Math.random() * 10 + 3;
+        const size = Math.random() * 4 + 2;
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
         const x = centerX + (Math.random() - 0.5) * 50;
