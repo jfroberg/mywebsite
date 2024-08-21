@@ -3,14 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Particle Simulation</title>
     <link rel="stylesheet" href="style.css">
-    <title>Particle Animation</title>
-    <input type="range" id="attractionSlider" min="0" max="1" step="0.01" value="0.2">
 </head>
 <body>
     <div class="circle-container">
         <canvas id="particleCanvas"></canvas>
     </div>
+    <button id="toggleForceButton">Toggle Force</button>
+    
+    <!-- Palette Selector -->
+    <select id="paletteSelector">
+        <option value="coolBlue">Cool Blue</option>
+        <option value="warmSunset">Warm Sunset</option>
+        <option value="greenForest">Green Forest</option>
+        <option value="midnightBlue">Midnight Blue</option>
+        <option value="emeraldNight">Emerald Night</option>
+        <option value="crimsonTwilight">Crimson Twilight</option>
+    </select>
+
     <script src="script.js"></script>
 </body>
 </html>

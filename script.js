@@ -10,17 +10,12 @@ function resizeCanvas() {
 resizeCanvas();
 
 const particlesArray = [];
-const numberOfParticles = 1000;
-let currentParticleCount = 0; // Track the number of particles currently spawned
-const spawnInterval = 10; // Time in milliseconds between spawning particles
-
-const mouse = {
-    x: null,
-    y: null,
-    radius: 150 // Interaction radius
-};
-
-let attractionActive = false; // Start with attraction off
+const numberOfParticles = 1800;
+let currentParticleCount = 0;
+const spawnInterval = 0;
+const mouse = { x: null, y: null, radius: 150 };
+let attractionActive = false;
+let repulsionMode = false;
 
 canvas.addEventListener('mousemove', function(event) {
     if (attractionActive) {
@@ -30,7 +25,6 @@ canvas.addEventListener('mousemove', function(event) {
     }
 });
 
-// Toggle attraction on click
 canvas.addEventListener('click', function() {
     attractionActive = !attractionActive;
     if (!attractionActive) {
@@ -39,13 +33,67 @@ canvas.addEventListener('click', function() {
     }
 });
 
-const attractionSlider = document.getElementById('attractionSlider');
-attractionSlider.addEventListener('input', function() {
-    const attractionForce = parseFloat(this.value);
-    particlesArray.forEach(particle => {
-        particle.attractionForce = attractionForce;
-    });
+document.getElementById('toggleForceButton').addEventListener('click', function() {
+    repulsionMode = !repulsionMode;
 });
+
+const palettes = {
+    coolBlue: {
+        particles: ['rgba(173, 216, 230, 0.8)', 'rgba(135, 206, 250, 0.8)', 'rgba(254, 205, 5, 0.8)', 'rgba(70, 130, 180, 0.8)'],
+        background: 'linear-gradient(135deg, #f0f8ff, #e6f7ff)',
+        button: '#fff',
+        buttonHover: '#f0f0f0'
+    },
+    warmSunset: {
+        particles: ['rgba(255, 99, 71, 0.8)', 'rgba(255, 140, 0, 0.8)', 'rgba(255, 165, 0, 0.8)', 'rgba(255, 69, 0, 0.8)'],
+        background: 'linear-gradient(135deg, #fff5e6, #ffe6cc)',
+        button: '#ffcccb',
+        buttonHover: '#ffb6b9'
+    },
+    greenForest: {
+        particles: ['rgba(34, 139, 34, 0.8)', 'rgba(0, 100, 0, 0.8)', 'rgba(50, 205, 50, 0.8)', 'rgba(144, 238, 144, 0.8)'],
+        background: 'linear-gradient(135deg, #e6ffe6, #ccffcc)',
+        button: '#d4edda',
+        buttonHover: '#c3e6cb'
+    },
+    midnightBlue: {
+        particles: ['rgba(25, 25, 112, 0.8)', 'rgba(0, 0, 139, 0.8)', 'rgba(72, 61, 139, 0.8)', 'rgba(123, 104, 238, 0.8)'],
+        background: 'linear-gradient(135deg, #000428, #004e92)',
+        button: '#1e3c72',
+        buttonHover: '#2a5298'
+    },
+    emeraldNight: {
+        particles: ['rgba(0, 100, 0, 0.8)', 'rgba(0, 128, 0, 0.8)', 'rgba(34, 139, 34, 0.8)', 'rgba(46, 139, 87, 0.8)'],
+        background: 'linear-gradient(135deg, #004d00, #001a00)',
+        button: '#006400',
+        buttonHover: '#008000'
+    },
+    crimsonTwilight: {
+        particles: ['rgba(139, 0, 0, 0.8)', 'rgba(85, 42, 102, 0.8)', 'rgba(178, 34, 34, 0.8)', 'rgba(220, 20, 60, 0.8)'],
+        background: 'linear-gradient(135deg, #2c003e, #3a000d)',
+        button: '#8b0000',
+        buttonHover: '#a52a2a'
+    }
+};
+
+// Set the initial palette to Crimson Twilight
+let currentPalette = palettes.coolBlue;
+
+// Ensure your palette selector can choose these new palettes
+document.getElementById('paletteSelector').addEventListener('change', function(event) {
+    currentPalette = palettes[event.target.value];
+    document.body.style.background = currentPalette.background;
+    document.getElementById('toggleForceButton').style.backgroundColor = currentPalette.button;
+    document.getElementById('toggleForceButton').addEventListener('mouseover', function() {
+        this.style.backgroundColor = currentPalette.buttonHover;
+    });
+    document.getElementById('toggleForceButton').addEventListener('mouseout', function() {
+        this.style.backgroundColor = currentPalette.button;
+    });
+    init(); // Reinitialize particles with the new palette
+});
+
+
 
 class Particle {
     constructor(x, y, size, color, weight) {
@@ -61,7 +109,7 @@ class Particle {
             y: Math.sin(angle) * speed
         };
         this.friction = 0.995;
-        this.attractionForce = 0.2;
+        this.attractionForce = 0.1;
     }
 
     draw() {
@@ -84,11 +132,17 @@ class Particle {
                 let force = (maxDistance - distance) / maxDistance * this.attractionForce;
                 let directionX = forceDirectionX * force * this.weight;
                 let directionY = forceDirectionY * force * this.weight;
-                this.velocity.x += directionX;
-                this.velocity.y += directionY;
+                if (repulsionMode) {
+                    this.velocity.x -= directionX;
+                    this.velocity.y -= directionY;
+                } else {
+                    this.velocity.x += directionX;
+                    this.velocity.y += directionY;
+                }
             }
         }
 
+        this.applyRepulsion();
         this.velocity.x *= this.friction;
         this.velocity.y *= this.friction;
         this.x += this.velocity.x;
@@ -106,24 +160,34 @@ class Particle {
             this.velocity.y = -this.velocity.y;
         }
     }
+
+    applyRepulsion() {
+        particlesArray.forEach(particle => {
+            if (particle !== this) {
+                let dx = this.x - particle.x;
+                let dy = this.y - particle.y;
+                let distance = Math.sqrt(dx * dx + dy * dy);
+                let minDistance = this.size + particle.size;
+                if (distance < minDistance) {
+                    let force = (minDistance - distance) / minDistance;
+                    let forceDirectionX = dx / distance;
+                    let forceDirectionY = dy / distance;
+                    this.velocity.x += forceDirectionX * force * 0.04;
+                    this.velocity.y += forceDirectionY * force * 0.04;
+                }
+            }
+        });
+    }
 }
 
 function spawnParticle() {
     if (currentParticleCount < numberOfParticles) {
-        const size = Math.random() * 5 + 1;
+        const size = Math.random() * 10 + 3;
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
         const x = centerX + (Math.random() - 0.5) * 50;
         const y = centerY + (Math.random() - 0.5) * 50;
-
-        // Use cool blue and white colors
-        const colors = [
-            'rgba(173, 216, 230, 0.8)', // Light blue
-            'rgba(135, 206, 250, 0.8)', // Sky blue
-            'rgba(255, 255, 255, 0.8)', // White
-            'rgba(70, 130, 180, 0.8)', // Steel blue
-        ];
-        const color = colors[Math.floor(Math.random() * colors.length)];
+        const color = currentPalette.particles[Math.floor(Math.random() * currentPalette.particles.length)];
         const weight = Math.random() * 2 + 1;
         particlesArray.push(new Particle(x, y, size, color, weight));
         currentParticleCount++;
